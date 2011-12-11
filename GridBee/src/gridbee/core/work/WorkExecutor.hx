@@ -133,6 +133,12 @@ class WorkExecutor implements Operable
 		{
 			this.temp.write(data.name, data.str);
 		}
+
+		if (command == "replace")
+		{
+			this.temp.clear(data.name);
+			this.temp.write(data.name, data.str);
+		}
 		
 		if (command == "progress")
 		{
