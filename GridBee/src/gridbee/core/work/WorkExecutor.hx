@@ -21,9 +21,11 @@ import henkolib.async.AsyncOperation;
 import henkolib.async.AsyncOperation;
 import henkolib.async.AsyncResult;
 import gridbee.core.iface.Operable;
-import gridbee.js.Worker;
+import gridbee.js.JSWorker;
 import henkolib.log.Console;
 import henkolib.log.LogLevel;
+import gridbee.js.EventTarget;
+import gridbee.core.iface.Worker;
 
 /**
  * @author Henko
@@ -57,11 +59,19 @@ class WorkExecutor implements Operable
 		if (start && context.isAvailable())
 		{
 			start = false;
-			this.worker = new Worker("worker.js");
-			this.worker.onmessage = onmessage;
-			this.worker.onerror = onerror;
 			
-			send("program", temp.getProgramCode());
+			if (context.getPlatform() == "nacl")
+			{
+				this.worker = new NaClWorker(temp.getProgramCode());
+			}
+			else //context.getPlatform() == "javascript"
+			{
+				this.worker = new JSWorker("worker.js");				
+				send("program", temp.getProgramCode());
+			}
+			
+			this.worker.setOnmessage(onmessage);
+			this.worker.setOnerror(onerror);
 			for (name in temp.getFileList())
 			{
 				var data = temp.read(name);

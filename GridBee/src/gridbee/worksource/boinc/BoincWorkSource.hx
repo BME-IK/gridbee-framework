@@ -157,7 +157,7 @@ class BoincWorkSource extends BasicWorkSource
 					{
 						self.workpool.add(wu);
 						self.onaddworkunit.invoke(wu);
-						Console.main.logInformation("Workunit added to pool", null, self);
+						Console.main.logInformation("New workunit recieved", null, self);
 					}
 				});
 				
@@ -341,8 +341,10 @@ class BoincWorkSource extends BasicWorkSource
 						break;
 					}
 				}
-				
-				var bwu = new BoincWorkUnit(unit);				
+				var platform : String = "";
+				for (v in reply.app_version)
+					platform = v.platform;
+				var bwu = new BoincWorkUnit(unit,platform);	
 				workunits.push(bwu);
 			}
 			

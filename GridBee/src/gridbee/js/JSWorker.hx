@@ -17,36 +17,29 @@
 // along with GridBee. If not, see <http://www.gnu.org/licenses/>.
 
 package gridbee.js;
+import gridbee.core.iface.Worker;
 
 /**
  * ...
  * @author MG
  */
 
-// http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html#event-definitions-1
-interface MessageEvent implements Event
-{
-	public var data : Dynamic;
-	public var origin : String;
-	public var lastEventId : String;
-	//public var source : Dynamic;
-	//public var ports : Dynamic;
-}
-
-// http://www.whatwg.org/specs/web-workers/current-work/#runtime-script-errors
-interface ErrorEvent implements Event
-{
-	public var message : String;
-	public var filename : String;
-	public var lineno : Int;
-}
-
 // http://www.whatwg.org/specs/web-workers/current-work/
-extern class Worker implements EventTarget
+extern class JSWorker implements Worker
 {
 	public function addEventListener(type : String, listener : Dynamic, useCapture : Bool = false) : Void;
 	public function removeEventListener(type : String, listener : Dynamic, useCapture : Bool = false) : Void;
 	public function dispatchEvent(event : Event) : Bool;	
+	
+	public function setOnmessage(func : MessageEvent -> Void) : Void
+	{
+		onmessage = func;
+	}
+	
+	public function setOnerror(func : ErrorEvent -> Void) : Void
+	{
+		onerror = func;
+	}
 	
 	public dynamic function onmessage(evt : MessageEvent) : Void;
 	public dynamic function onerror(evt : ErrorEvent) : Void;
@@ -61,9 +54,9 @@ extern class Worker implements EventTarget
 	{
 		try
 		{
-			untyped gridbee.js["Worker"] = untyped __js__("Worker");
+			untyped gridbee.js["JSWorker"] = untyped __js__("Worker");
 		} catch (e : Dynamic) {
-			untyped gridbee.js["Worker"] = null;
+			untyped gridbee.js["JSWorker"] = null;
 		}
 	}
 
