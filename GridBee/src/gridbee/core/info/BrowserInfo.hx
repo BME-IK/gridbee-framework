@@ -263,6 +263,18 @@ class BrowserInfo
 		return html5webSocketsValue;
 	}
 	
+	public static function NaCl() : Bool
+	{
+		var testNaclElement:Dynamic = js.Lib.document.createElement("embed");
+		testNaclElement.setAttribute("type", "application/x-nacl");
+		testNaclElement.setAttribute("width",0);
+		testNaclElement.setAttribute("height",0);		
+		js.Lib.document.body.appendChild(testNaclElement);	
+		var isSupported : Bool = testNaclElement.postMessage ? true : false;
+		js.Lib.document.body.removeChild(testNaclElement);
+		return isSupported;
+	}
+	
 	private function new() { }	
 	
 	public static function __init__() : Void

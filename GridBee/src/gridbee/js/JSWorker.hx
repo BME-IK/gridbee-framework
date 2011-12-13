@@ -21,7 +21,7 @@ import gridbee.core.iface.Worker;
 
 /**
  * ...
- * @author MG
+ * @author MG, tbur
  */
 
 // http://www.whatwg.org/specs/web-workers/current-work/
