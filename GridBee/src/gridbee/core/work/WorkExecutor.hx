@@ -59,7 +59,6 @@ class WorkExecutor implements Operable
 		if (start && context.isAvailable())
 		{
 			start = false;
-			
 			if (context.getPlatform() == "nacl")
 			{
 				this.worker = new NaClWorker(temp.getProgramCode());

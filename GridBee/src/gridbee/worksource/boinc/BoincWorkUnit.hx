@@ -48,11 +48,10 @@ class BoincWorkUnit extends BasicWorkUnit
 
 	override public function new(unit : Workunit, ?platform : String = "") 
 	{
-		super();
 		this.unitinfo = unit;		
 		this.readytoreport = false;
 		this.filesdownloaded = false;
-		this.context.setPlatform(platform);
+		super(platform);
 	}
 	
 	override private function init()

@@ -53,10 +53,11 @@ class BasicWorkUnit implements WorkUnit, implements AsyncResult<WorkContext>
 	private var onstatuschange : SimpleEvent;
 	public var onStatusChange(default, null) : PublicSimpleEvent;
 	
-	public function new()
+	public function new(?platform : String = "")
 	{
 		this.state = Init;									// Setting to Passive implemented in children
 		this.context = new WorkContext();
+		this.context.setPlatform(platform);
 
 		init();
 	}

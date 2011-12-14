@@ -1296,6 +1296,13 @@ gridbee.worksource.boinc.BoincWorkSource = function(scheduler_url,authkey) { if(
 	this.authinfo.authenticator = authkey;
 	this.benchmarkpool = new gridbee.core.work.WorkUnitPool();
 	this.uploader = new gridbee.worksource.boinc.BoincUploaderPool();
+	if(gridbee.core.info.BrowserInfo.NaCl()) {
+		this.platform = "nacl";
+		henkolib.log.Console.main.logInformation("Setting platform to NaCl",null,this,{ fileName : "BoincWorkSource.hx", lineNumber : 104, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "new"});
+	}
+	else {
+		this.platform = "javascript";
+	}
 	this.host = new gridbee.worksource.boinc.request.Host();
 	this.host.host_info.p_fpops = 0;
 	this.host.host_info.p_iops = 0;
@@ -1306,7 +1313,6 @@ gridbee.worksource.boinc.BoincWorkSource.__name__ = ["gridbee","worksource","boi
 gridbee.worksource.boinc.BoincWorkSource.__super__ = gridbee.core.work.BasicWorkSource;
 for(var k in gridbee.core.work.BasicWorkSource.prototype ) gridbee.worksource.boinc.BoincWorkSource.prototype[k] = gridbee.core.work.BasicWorkSource.prototype[k];
 gridbee.worksource.boinc.BoincWorkSource.version = null;
-gridbee.worksource.boinc.BoincWorkSource.platform = null;
 gridbee.worksource.boinc.BoincWorkSource.getVersion = function() {
 	$s.push("gridbee.worksource.boinc.BoincWorkSource::getVersion");
 	var $spos = $s.length;
@@ -1320,6 +1326,7 @@ gridbee.worksource.boinc.BoincWorkSource.getVersion = function() {
 gridbee.worksource.boinc.BoincWorkSource.prototype.projecturl = null;
 gridbee.worksource.boinc.BoincWorkSource.prototype.projectname = null;
 gridbee.worksource.boinc.BoincWorkSource.prototype.username = null;
+gridbee.worksource.boinc.BoincWorkSource.prototype.platform = null;
 gridbee.worksource.boinc.BoincWorkSource.prototype.scheduler_url = null;
 gridbee.worksource.boinc.BoincWorkSource.prototype.authinfo = null;
 gridbee.worksource.boinc.BoincWorkSource.prototype.host = null;
@@ -1339,18 +1346,18 @@ gridbee.worksource.boinc.BoincWorkSource.prototype.init = function() {
 		var benchmark = new gridbee.worksource.boinc.benchmark.WhetstoneBenchmark();
 		var self = this;
 		benchmark.onComplete.subscribe(function(c) {
-			$s.push("gridbee.worksource.boinc.BoincWorkSource::init@122");
+			$s.push("gridbee.worksource.boinc.BoincWorkSource::init@130");
 			var $spos = $s.length;
 			self.host.host_info.p_fpops = benchmark.getFlops();
 			self.updateHostInfo();
 			self.benchmarkpool.removeCompleted();
-			henkolib.log.Console.main.logInformation("Benchmark successfully executed.",null,self,{ fileName : "BoincWorkSource.hx", lineNumber : 127, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "init"});
+			henkolib.log.Console.main.logInformation("Benchmark successfully executed.",null,self,{ fileName : "BoincWorkSource.hx", lineNumber : 135, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "init"});
 			$s.pop();
 		});
 		benchmark.onError.subscribe(function(e) {
-			$s.push("gridbee.worksource.boinc.BoincWorkSource::init@129");
+			$s.push("gridbee.worksource.boinc.BoincWorkSource::init@137");
 			var $spos = $s.length;
-			henkolib.log.Console.main.logError("Benchmark error: " + e,null,self,{ fileName : "BoincWorkSource.hx", lineNumber : 131, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "init"});
+			henkolib.log.Console.main.logError("Benchmark error: " + e,null,self,{ fileName : "BoincWorkSource.hx", lineNumber : 139, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "init"});
 			self.benchmarkpool.removeCompleted();
 			$s.pop();
 		});
@@ -1377,22 +1384,28 @@ gridbee.worksource.boinc.BoincWorkSource.prototype.startOne = function() {
 			var newworks = this.requestWorks();
 			var self = this;
 			newworks.onComplete.subscribe(function(wus) {
-				$s.push("gridbee.worksource.boinc.BoincWorkSource::startOne@154");
+				$s.push("gridbee.worksource.boinc.BoincWorkSource::startOne@162");
 				var $spos = $s.length;
-				var _g = 0;
-				while(_g < wus.length) {
-					var wu = wus[_g];
-					++_g;
-					self.workpool.add(wu);
-					self.onaddworkunit.invoke(wu);
-					henkolib.log.Console.main.logInformation("New workunit recieved",null,self,{ fileName : "BoincWorkSource.hx", lineNumber : 160, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "startOne"});
+				if(wus.length == 0) {
+					self.platform = "javascript";
+					henkolib.log.Console.main.logInformation("Setting platform to JavaScript",null,self,{ fileName : "BoincWorkSource.hx", lineNumber : 167, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "startOne"});
+				}
+				{
+					var _g = 0;
+					while(_g < wus.length) {
+						var wu = wus[_g];
+						++_g;
+						self.workpool.add(wu);
+						self.onaddworkunit.invoke(wu);
+						henkolib.log.Console.main.logInformation("New workunit recieved",null,self,{ fileName : "BoincWorkSource.hx", lineNumber : 173, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "startOne"});
+					}
 				}
 				$s.pop();
 			});
 			newworks.onError.subscribe(function(errormes) {
-				$s.push("gridbee.worksource.boinc.BoincWorkSource::startOne@164");
+				$s.push("gridbee.worksource.boinc.BoincWorkSource::startOne@177");
 				var $spos = $s.length;
-				henkolib.log.Console.main.logNotice(errormes,null,null,{ fileName : "BoincWorkSource.hx", lineNumber : 166, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "startOne"});
+				henkolib.log.Console.main.logNotice(errormes,null,null,{ fileName : "BoincWorkSource.hx", lineNumber : 179, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "startOne"});
 				$s.pop();
 			});
 		}
@@ -1465,9 +1478,9 @@ gridbee.worksource.boinc.BoincWorkSource.prototype.requestWorks = function() {
 	$s.push("gridbee.worksource.boinc.BoincWorkSource::requestWorks");
 	var $spos = $s.length;
 	this.requestinprogress = true;
-	var request = new gridbee.worksource.boinc.request.SchedulerRequest(gridbee.worksource.boinc.BoincWorkSource.platform);
+	var request = new gridbee.worksource.boinc.request.SchedulerRequest(this.platform);
 	request.setClientVersion(gridbee.worksource.boinc.BoincWorkSource.version);
-	request.setPlatform(gridbee.worksource.boinc.BoincWorkSource.platform);
+	request.setPlatform(this.platform);
 	request.setAuthInfo(this.authinfo);
 	request.setHost(this.host);
 	request.setWorkRequest(new gridbee.worksource.boinc.request.WorkRequest(10));
@@ -1476,7 +1489,7 @@ gridbee.worksource.boinc.BoincWorkSource.prototype.requestWorks = function() {
 		while(_g < _g1.length) {
 			var work = _g1[_g];
 			++_g;
-			henkolib.log.Console.main.logInformation("Reporting uploaded results to: " + this.getScreenName(),null,work,{ fileName : "BoincWorkSource.hx", lineNumber : 231, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "requestWorks"});
+			henkolib.log.Console.main.logInformation("Reporting uploaded results to: " + this.getScreenName(),null,work,{ fileName : "BoincWorkSource.hx", lineNumber : 244, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "requestWorks"});
 			request.addResult(work.getBoincResult());
 		}
 	}
@@ -1485,30 +1498,30 @@ gridbee.worksource.boinc.BoincWorkSource.prototype.requestWorks = function() {
 	var http = gridbee.core.net.HTTPRequest.post(this.scheduler_url);
 	http.rawData(request.toXmlString());
 	http.errorCallback(function(error) {
-		$s.push("gridbee.worksource.boinc.BoincWorkSource::requestWorks@240");
+		$s.push("gridbee.worksource.boinc.BoincWorkSource::requestWorks@253");
 		var $spos = $s.length;
 		result.setError(error);
 		self.requestinprogress = false;
 		$s.pop();
 	});
 	http.successCallback(function(response) {
-		$s.push("gridbee.worksource.boinc.BoincWorkSource::requestWorks@241");
+		$s.push("gridbee.worksource.boinc.BoincWorkSource::requestWorks@254");
 		var $spos = $s.length;
-		henkolib.log.Console.main.logInformation("Received Boinc Scheduler reply.",null,self,{ fileName : "BoincWorkSource.hx", lineNumber : 243, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "requestWorks"});
+		henkolib.log.Console.main.logInformation("Received Boinc Scheduler reply.",null,self,{ fileName : "BoincWorkSource.hx", lineNumber : 256, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "requestWorks"});
 		var xml = new haxe.xml.Fast(Xml.parse(response.content).firstElement());
 		var reply = new gridbee.worksource.boinc.reply.SchedulerReply(xml);
 		if(reply.hostid != null) {
 			self.host.hostid = reply.hostid;
-			henkolib.log.Console.main.logNotice("Registered new host: " + reply.hostid,null,self,{ fileName : "BoincWorkSource.hx", lineNumber : 253, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "requestWorks"});
-			henkolib.log.Console.main.logNotice("Project name: " + reply.project_name,null,self,{ fileName : "BoincWorkSource.hx", lineNumber : 254, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "requestWorks"});
-			henkolib.log.Console.main.logNotice("Username: " + reply.user_name,null,self,{ fileName : "BoincWorkSource.hx", lineNumber : 255, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "requestWorks"});
+			henkolib.log.Console.main.logNotice("Registered new host: " + reply.hostid,null,self,{ fileName : "BoincWorkSource.hx", lineNumber : 266, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "requestWorks"});
+			henkolib.log.Console.main.logNotice("Project name: " + reply.project_name,null,self,{ fileName : "BoincWorkSource.hx", lineNumber : 267, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "requestWorks"});
+			henkolib.log.Console.main.logNotice("Username: " + reply.user_name,null,self,{ fileName : "BoincWorkSource.hx", lineNumber : 268, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "requestWorks"});
 		}
 		{
 			var _g = 0, _g1 = reply.result_ack;
 			while(_g < _g1.length) {
 				var ack = _g1[_g];
 				++_g;
-				henkolib.log.Console.main.logInformation("Received result ack: " + ack.name,null,self,{ fileName : "BoincWorkSource.hx", lineNumber : 263, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "requestWorks"});
+				henkolib.log.Console.main.logInformation("Received result ack: " + ack.name,null,self,{ fileName : "BoincWorkSource.hx", lineNumber : 276, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "requestWorks"});
 				{
 					var _g2 = 0, _g3 = self.reportqueue;
 					while(_g2 < _g3.length) {
@@ -1516,7 +1529,7 @@ gridbee.worksource.boinc.BoincWorkSource.prototype.requestWorks = function() {
 						++_g2;
 						if(work.getWorkUnitResultName() == ack.name) {
 							self.reportqueue.remove(work);
-							henkolib.log.Console.main.logNotice("Reported result accepted. WorkUnit removed.",null,work,{ fileName : "BoincWorkSource.hx", lineNumber : 269, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "requestWorks"});
+							henkolib.log.Console.main.logNotice("Reported result accepted. WorkUnit removed.",null,work,{ fileName : "BoincWorkSource.hx", lineNumber : 282, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "requestWorks"});
 							self.onremoveworkunit.invoke(work);
 						}
 					}
@@ -1528,7 +1541,7 @@ gridbee.worksource.boinc.BoincWorkSource.prototype.requestWorks = function() {
 			while(_g < _g1.length) {
 				var message = _g1[_g];
 				++_g;
-				henkolib.log.Console.main.logNotice("BOINC " + message.priority + " priority message: " + message.message,null,self,{ fileName : "BoincWorkSource.hx", lineNumber : 280, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "requestWorks"});
+				henkolib.log.Console.main.logNotice("BOINC " + message.priority + " priority message: " + message.message,null,self,{ fileName : "BoincWorkSource.hx", lineNumber : 293, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "requestWorks"});
 			}
 		}
 		var workunits = new Array();
@@ -1631,7 +1644,7 @@ gridbee.worksource.boinc.BoincWorkSource.prototype.requestWorks = function() {
 		self.requestinprogress = false;
 		$s.pop();
 	});
-	henkolib.log.Console.main.logInformation("Sending Boinc Scheduler request.",null,this,{ fileName : "BoincWorkSource.hx", lineNumber : 355, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "requestWorks"});
+	henkolib.log.Console.main.logInformation("Sending Boinc Scheduler request.",null,this,{ fileName : "BoincWorkSource.hx", lineNumber : 368, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "requestWorks"});
 	http.send();
 	{
 		$s.pop();
@@ -1642,7 +1655,7 @@ gridbee.worksource.boinc.BoincWorkSource.prototype.requestWorks = function() {
 gridbee.worksource.boinc.BoincWorkSource.prototype.reportWork = function(work) {
 	$s.push("gridbee.worksource.boinc.BoincWorkSource::reportWork");
 	var $spos = $s.length;
-	henkolib.log.Console.main.logInformation("Added to reporting queue: " + work.getScreenName(),null,this,{ fileName : "BoincWorkSource.hx", lineNumber : 363, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "reportWork"});
+	henkolib.log.Console.main.logInformation("Added to reporting queue: " + work.getScreenName(),null,this,{ fileName : "BoincWorkSource.hx", lineNumber : 376, className : "gridbee.worksource.boinc.BoincWorkSource", methodName : "reportWork"});
 	this.reportqueue.push(work);
 	$s.pop();
 }
@@ -1657,6 +1670,7 @@ gridbee.worksource.boinc.BoincWorkSource.prototype.hxSerialize = function(s) {
 	s.serialize(this.projecturl);
 	s.serialize(this.projectname);
 	s.serialize(this.username);
+	s.serialize(this.platform);
 	gridbee.core.work.BasicWorkSource.prototype.hxSerialize.call(this,s);
 	$s.pop();
 }
@@ -1671,6 +1685,7 @@ gridbee.worksource.boinc.BoincWorkSource.prototype.hxUnserialize = function(s) {
 	this.projecturl = s.unserialize();
 	this.projectname = s.unserialize();
 	this.username = s.unserialize();
+	this.platform = s.unserialize();
 	gridbee.core.work.BasicWorkSource.prototype.hxUnserialize.call(this,s);
 	$s.pop();
 }
@@ -4943,7 +4958,7 @@ gridbee.core.work._NaClWorker.NaClWorker_StringOnly.prototype.dispatchEvent = fu
 gridbee.core.work._NaClWorker.NaClWorker_StringOnly.prototype._onprogress = function(evt) {
 	$s.push("gridbee.core.work._NaClWorker.NaClWorker_StringOnly::_onprogress");
 	var $spos = $s.length;
-	haxe.Log.trace(evt.type,{ fileName : "NaClWorker.hx", lineNumber : 89, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "_onprogress"});
+	haxe.Log.trace(evt.type,{ fileName : "NaClWorker.hx", lineNumber : 107, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "_onprogress"});
 	$s.pop();
 }
 gridbee.core.work._NaClWorker.NaClWorker_StringOnly.prototype._onabort = function(evt) {
@@ -4968,12 +4983,12 @@ gridbee.core.work._NaClWorker.NaClWorker_StringOnly.prototype.onerrorTheRealOne 
 gridbee.core.work._NaClWorker.NaClWorker_StringOnly.prototype.onerrorSetter = function(func) {
 	$s.push("gridbee.core.work._NaClWorker.NaClWorker_StringOnly::onerrorSetter");
 	var $spos = $s.length;
-	haxe.Log.trace("onerrorSetter called",{ fileName : "NaClWorker.hx", lineNumber : 117, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "onerrorSetter"});
+	haxe.Log.trace("onerrorSetter called",{ fileName : "NaClWorker.hx", lineNumber : 135, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "onerrorSetter"});
 	if(func != null) {
-		if(!this.onerrorQueue.isEmpty()) haxe.Log.trace("  sending content of queue",{ fileName : "NaClWorker.hx", lineNumber : 120, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "onerrorSetter"});
+		if(!this.onerrorQueue.isEmpty()) haxe.Log.trace("  sending content of queue",{ fileName : "NaClWorker.hx", lineNumber : 138, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "onerrorSetter"});
 		var evt;
 		while((evt = this.onerrorQueue.pop()) != null) {
-			haxe.Log.trace("    sent",{ fileName : "NaClWorker.hx", lineNumber : 123, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "onerrorSetter"});
+			haxe.Log.trace("    sent",{ fileName : "NaClWorker.hx", lineNumber : 141, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "onerrorSetter"});
 			func(evt);
 		}
 		this.onerrorTheRealOne = func;
@@ -4997,15 +5012,15 @@ gridbee.core.work._NaClWorker.NaClWorker_StringOnly.prototype.onerrorGetter = fu
 gridbee.core.work._NaClWorker.NaClWorker_StringOnly.prototype._onerror = function(origEvent) {
 	$s.push("gridbee.core.work._NaClWorker.NaClWorker_StringOnly::_onerror");
 	var $spos = $s.length;
-	haxe.Log.trace("_onerror called",{ fileName : "NaClWorker.hx", lineNumber : 137, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "_onerror"});
+	haxe.Log.trace("_onerror called",{ fileName : "NaClWorker.hx", lineNumber : 155, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "_onerror"});
 	var errorEvent = new ErrorEvent();
 	errorEvent.message = this.naclElement.lastError;
 	if(this.onerrorGetter() != null) {
-		haxe.Log.trace("  handing it off to onerror",{ fileName : "NaClWorker.hx", lineNumber : 143, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "_onerror"});
+		haxe.Log.trace("  handing it off to onerror",{ fileName : "NaClWorker.hx", lineNumber : 161, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "_onerror"});
 		(this.onerrorGetter())(errorEvent);
 	}
 	else {
-		haxe.Log.trace("  queueing it",{ fileName : "NaClWorker.hx", lineNumber : 146, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "_onerror"});
+		haxe.Log.trace("  queueing it",{ fileName : "NaClWorker.hx", lineNumber : 164, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "_onerror"});
 		this.onerrorQueue.add(errorEvent);
 	}
 	$s.pop();
@@ -5016,12 +5031,12 @@ gridbee.core.work._NaClWorker.NaClWorker_StringOnly.prototype.onmessageTheRealOn
 gridbee.core.work._NaClWorker.NaClWorker_StringOnly.prototype.onmessageSetter = function(func) {
 	$s.push("gridbee.core.work._NaClWorker.NaClWorker_StringOnly::onmessageSetter");
 	var $spos = $s.length;
-	haxe.Log.trace("onmessageSetter called",{ fileName : "NaClWorker.hx", lineNumber : 160, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "onmessageSetter"});
+	haxe.Log.trace("onmessageSetter called",{ fileName : "NaClWorker.hx", lineNumber : 178, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "onmessageSetter"});
 	if(func != null) {
-		if(!this.onmessageQueue.isEmpty()) haxe.Log.trace("  sending content of queue",{ fileName : "NaClWorker.hx", lineNumber : 163, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "onmessageSetter"});
+		if(!this.onmessageQueue.isEmpty()) haxe.Log.trace("  sending content of queue",{ fileName : "NaClWorker.hx", lineNumber : 181, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "onmessageSetter"});
 		var evt;
 		while((evt = this.onmessageQueue.pop()) != null) {
-			haxe.Log.trace("    sent",{ fileName : "NaClWorker.hx", lineNumber : 166, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "onmessageSetter"});
+			haxe.Log.trace("    sent",{ fileName : "NaClWorker.hx", lineNumber : 184, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "onmessageSetter"});
 			func(evt);
 		}
 		this.onmessageTheRealOne = func;
@@ -5045,13 +5060,13 @@ gridbee.core.work._NaClWorker.NaClWorker_StringOnly.prototype.onmessageGetter = 
 gridbee.core.work._NaClWorker.NaClWorker_StringOnly.prototype._onmessage = function(evt) {
 	$s.push("gridbee.core.work._NaClWorker.NaClWorker_StringOnly::_onmessage");
 	var $spos = $s.length;
-	haxe.Log.trace("_onmessage called",{ fileName : "NaClWorker.hx", lineNumber : 177, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "_onmessage"});
+	haxe.Log.trace("_onmessage called",{ fileName : "NaClWorker.hx", lineNumber : 195, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "_onmessage"});
 	if(this.onmessageGetter() != null) {
-		haxe.Log.trace("  handing it off to onmessage",{ fileName : "NaClWorker.hx", lineNumber : 179, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "_onmessage"});
+		haxe.Log.trace("  handing it off to onmessage",{ fileName : "NaClWorker.hx", lineNumber : 197, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "_onmessage"});
 		(this.onmessageGetter())(evt);
 	}
 	else {
-		haxe.Log.trace("  queueing it",{ fileName : "NaClWorker.hx", lineNumber : 182, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "_onmessage"});
+		haxe.Log.trace("  queueing it",{ fileName : "NaClWorker.hx", lineNumber : 200, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "_onmessage"});
 		this.onmessageQueue.add(evt);
 	}
 	$s.pop();
@@ -5121,7 +5136,7 @@ gridbee.core.work.NaClWorker.prototype.setOnmessage = function(func) {
 gridbee.core.work.NaClWorker.prototype._onmessage = function(evt) {
 	$s.push("gridbee.core.work.NaClWorker::_onmessage");
 	var $spos = $s.length;
-	haxe.Log.trace("_onmessage JSON wrapper called with " + evt.data,{ fileName : "NaClWorker.hx", lineNumber : 52, className : "gridbee.core.work.NaClWorker", methodName : "_onmessage"});
+	haxe.Log.trace("_onmessage JSON wrapper called with " + evt.data,{ fileName : "NaClWorker.hx", lineNumber : 70, className : "gridbee.core.work.NaClWorker", methodName : "_onmessage"});
 	try {
 		evt.data = new gridbee.core.work.hxjson2.JSONDecoder(evt.data,true).getValue();
 	}
@@ -5149,7 +5164,7 @@ gridbee.core.work.NaClWorker.prototype._onmessage = function(evt) {
 gridbee.core.work.NaClWorker.prototype.postMessage = function(message) {
 	$s.push("gridbee.core.work.NaClWorker::postMessage");
 	var $spos = $s.length;
-	haxe.Log.trace("postMessage JSON wrapper called with " + message,{ fileName : "NaClWorker.hx", lineNumber : 66, className : "gridbee.core.work.NaClWorker", methodName : "postMessage"});
+	haxe.Log.trace("postMessage JSON wrapper called with " + message,{ fileName : "NaClWorker.hx", lineNumber : 84, className : "gridbee.core.work.NaClWorker", methodName : "postMessage"});
 	message = new gridbee.core.work.hxjson2.JSONEncoder(message).getString();
 	gridbee.core.work._NaClWorker.NaClWorker_StringOnly.prototype.postMessage.call(this,message);
 	$s.pop();
@@ -8229,6 +8244,22 @@ gridbee.core.info.BrowserInfo.html5webSockets = function() {
 		var $tmp = gridbee.core.info.BrowserInfo.html5webSocketsValue;
 		$s.pop();
 		return $tmp;
+	}
+	$s.pop();
+}
+gridbee.core.info.BrowserInfo.NaCl = function() {
+	$s.push("gridbee.core.info.BrowserInfo::NaCl");
+	var $spos = $s.length;
+	var testNaclElement = js.Lib.document.createElement("embed");
+	testNaclElement.setAttribute("type","application/x-nacl");
+	testNaclElement.setAttribute("width",0);
+	testNaclElement.setAttribute("height",0);
+	js.Lib.document.body.appendChild(testNaclElement);
+	var isSupported = testNaclElement.postMessage?true:false;
+	js.Lib.document.body.removeChild(testNaclElement);
+	{
+		$s.pop();
+		return isSupported;
 	}
 	$s.pop();
 }
@@ -12308,7 +12339,6 @@ $e = [];
 js.Boot.__init();
 {
 	gridbee.worksource.boinc.BoincWorkSource.version = new gridbee.worksource.boinc.request.ClientVersion(3,0,0);
-	gridbee.worksource.boinc.BoincWorkSource.platform = "javascript";
 }
 {
 	gridbee.js["XMLHttpRequest"] = typeof XMLHttpRequest != 'undefined'?XMLHttpRequest:typeof ActiveXObject != 'undefined'?function() {

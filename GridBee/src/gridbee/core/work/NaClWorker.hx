@@ -24,6 +24,7 @@ import js.Dom;
 import js.Lib;
 import gridbee.core.work.hxjson2.JSON;
 import gridbee.core.iface.Worker;
+import henkolib.log.Console;
 
 /**
  * ...
@@ -51,17 +52,6 @@ import gridbee.core.iface.Worker;
  */
 class NaClWorker extends NaClWorker_StringOnly, implements Worker
 {
-	
-	public function setOnerror(func : ErrorEvent -> Void) : Void
-	{
-		onerror = func;
-	}
-	
-	public function setOnmessage(func : MessageEvent -> Void) : Void
-	{
-		onmessage = func;
-	}
-  
 	public static function isSupported():Bool {
 		return NaClWorker_StringOnly.isSupported();
 	}
@@ -84,12 +74,23 @@ class NaClWorker extends NaClWorker_StringOnly, implements Worker
 		Log.trace("postMessage JSON wrapper called with " + message);    
 		message = JSON.encode(message); //FIXME: error handling
 		super.postMessage(message);
+	}	
+	
+	public function setOnerror(func : ErrorEvent -> Void) : Void
+	{
+		onerror = func;
+	}
+	
+	public function setOnmessage(func : MessageEvent -> Void) : Void
+	{
+		onmessage = func;
 	}
 }
 
 
 private class NaClWorker_StringOnly implements EventTarget
 {
+
 	var naclElement : Dynamic;
 		
 	public function addEventListener(type : String, listener : Dynamic, useCapture : Bool = false) : Void {
@@ -153,7 +154,6 @@ private class NaClWorker_StringOnly implements EventTarget
 		// we are going to create an ErrorEvent based on naclElement.lastError
 		
 		Log.trace("_onerror called");				
-		
 		var errorEvent : ErrorEvent = untyped __js__('new ErrorEvent()'); //converting this to String says [Object], why?
 		errorEvent.message = naclElement.lastError;
 		
@@ -227,7 +227,7 @@ private class NaClWorker_StringOnly implements EventTarget
 	}
 	
 	//Support for NaCl should be checked with isSupported before trying to create a new instance
-	public function new(filename : String) : Void {		
+	public function new(filename : String) : Void {
 		this.isReady = false;		
 		this.postMessageQueue = new List<String>();
 		this.onmessageQueue = new List<MessageEvent>();

@@ -39,6 +39,7 @@ class WhetstoneBenchmark extends BasicWorkUnit
 		';
 		
 		context.setProgramCode(code);
+		context.setPlatform("javascript");
 		
 		SwitchState(Passive);
 	}
