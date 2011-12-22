@@ -48,13 +48,6 @@ interface ErrorEvent implements Event
 	public var lineno : Int;
 }
 
-interface EventTarget
-{
-	public function addEventListener(type : String, listener : Dynamic, useCapture : Bool = false) : Void;
-	public function removeEventListener(type : String, listener : Dynamic, useCapture : Bool = false) : Void;
-	public function dispatchEvent(event : Event) : Bool;
-}
-
 // http://www.w3.org/TR/progress-events/
 interface ProgressEvent implements Event {	
 	public var lengthComputable: Bool;
@@ -62,12 +55,8 @@ interface ProgressEvent implements Event {
 	public var total : Int;
 }
 
-
-interface Worker implements EventTarget
+interface Worker
 {
-	public function addEventListener(type : String, listener : Dynamic, useCapture : Bool = false) : Void;
-	public function removeEventListener(type : String, listener : Dynamic, useCapture : Bool = false) : Void;
-	public function dispatchEvent(event : Event) : Bool;	
 
 	public function setOnerror(func : ErrorEvent -> Void) : Void;
 	public function setOnmessage(func : MessageEvent -> Void) : Void;	

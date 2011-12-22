@@ -61,11 +61,7 @@ class NaClWorker extends NaClWorker_StringOnly, implements Worker
 		try{
 			evt.data = JSON.decode(evt.data);  
 		}catch (unknown : Dynamic) {
-			var errorEvent : ErrorEvent = untyped __js__('new ErrorEvent()'); //converting this to String says [Object], why?
-			errorEvent.message = "Got invalid JSON from NaCl. NaCl termined.\n";
-			onerror(errorEvent);
-			terminate();
-			return;
+			evt.data =  JSON.decode('{"command": "exception", "exception" : { "message" : "Got invalid JSON from NaCl. NaCl termined." }}');
 		}
 		super._onmessage(evt);
 	}
@@ -88,88 +84,16 @@ class NaClWorker extends NaClWorker_StringOnly, implements Worker
 }
 
 
-private class NaClWorker_StringOnly implements EventTarget
+private class NaClWorker_StringOnly
 {
-
-	var naclElement : Dynamic;
-		
-	public function addEventListener(type : String, listener : Dynamic, useCapture : Bool = false) : Void {
-		naclElement.addEventListener(type, listener, useCapture);
-	}	
-	public function removeEventListener(type : String, listener : Dynamic, useCapture : Bool = false) : Void {
-		naclElement.removeEventListener(type, listener, useCapture);
-	}	
-	public function dispatchEvent(event : Event) : Bool {
-		return naclElement.dispatchEvent(event);		
-	}
+  var outerIframe : Dynamic;
+  var innerIframe : Dynamic;
 	
-	
-	private function _onprogress(evt : ProgressEvent) : Void {
-		Log.trace(evt.type);
-	}
-	
-	private function _onabort(evt : ProgressEvent) : Void {
-		//Never experienced irl
-    var errorEvent : ErrorEvent = untyped __js__('new ErrorEvent()'); //converting this to String says [Object], why?
-    errorEvent.message = "NaCl aborted";
-    onerror(errorEvent);
-	}
-	
-	private function _oncrash(evt : ProgressEvent) : Void {
-		var errorEvent : ErrorEvent = untyped __js__('new ErrorEvent()'); //converting this to String says [Object], why?
-    errorEvent.message = "NaCl module crashed";
-    onerror(errorEvent);
-	}
-	
-	
-	/* onerror(ErrorEvent):Void;
-	 * We queue the errors coming from NaCl until the user of the class assigns something to onerror.
-	 * This is truly neccesary, because otherwise errors from the Initial stages of NaCl initialization could get lost, such as:
-	 * file not found, insufficient memory, etc...
-	 * 
-	 * (I could have avoided this by only starting the executing when onerror has already been set, but I wanted this class to act like a WebWorker.)
-	 */	
-	var onerrorQueue : List<ErrorEvent>; //Queue messages until user sets onerror
-	public  var onerror (onerrorGetter , onerrorSetter): ErrorEvent -> Void; //This is what gets set by the user. Its setter sends the contents of its queue to it.
-	private var onerrorTheRealOne : ErrorEvent -> Void; //The internal variable that gets set/read by the getter/setter.
-	private function onerrorSetter(func : ErrorEvent -> Void) : ErrorEvent -> Void {		
-		Log.trace("onerrorSetter called");
-		if (func != null) {
-			if (!onerrorQueue.isEmpty())
-				Log.trace("  sending content of queue");
-			var evt : ErrorEvent;
-			while ((evt = onerrorQueue.pop()) != null) { 
-				Log.trace("    sent");
-				func(evt);			
-			}
-			this.onerrorTheRealOne = func;
-		}		
-		return func;
-	}
-	private function onerrorGetter(): ErrorEvent -> Void {
-		return this.onerrorTheRealOne;
-	}
-	private function _onerror(origEvent : ProgressEvent) : Void {
-		// yep, for some reason we get a ProgressEvent, but it doesn't really matter, becuase it is pretty empty.
-		// we are going to create an ErrorEvent based on naclElement.lastError
-		
-		Log.trace("_onerror called");				
-		var errorEvent : ErrorEvent = untyped __js__('new ErrorEvent()'); //converting this to String says [Object], why?
-		errorEvent.message = naclElement.lastError;
-		
-		if (this.onerror != null) {
-			Log.trace("  handing it off to onerror");
-			this.onerror(errorEvent);
-		}else {
-			Log.trace("  queueing it");
-			onerrorQueue.add(errorEvent);
-		}
-	}
-	
-	
+  public var onerror(default,default) : ErrorEvent -> Void; //Not used. We only use exception type messages.
+  
 	/* onmessage(MessageEvent):Void;
 	 * We queue the messages coming from NaCl until the user of the class assigns something to onmessage.
-	 * There is no known case where this is truly neccesary, because NaCl modules don't load that fast...
+	 * It is neccasary because exception type messages can occur right after loading the module.
 	 */	
 	var onmessageQueue : List<MessageEvent>; //Queue messages until user sets onmessage
 	public var onmessage (onmessageGetter , onmessageSetter): MessageEvent -> Void; //This is what gets set by the user. Its setter sends the contents of its queue to it.
@@ -193,25 +117,21 @@ private class NaClWorker_StringOnly implements EventTarget
 	}
 	private function _onmessage(evt: MessageEvent) : Void {	
 		Log.trace("_onmessage called");
-		if (this.onmessage != null) {
-			Log.trace("  handing it off to onmessage");
-			this.onmessage(evt);
-		}else {
-			Log.trace("  queueing it");
-			onmessageQueue.add(evt);
-		}
-	}
-	
-	
-	private function _onload() : Void {
-		this.isReady = true;
-		
-		//NaCl became ready -> Send queued messages
-		var message : String;		
-		while ((message = postMessageQueue.pop())!=null) { 
-			naclElement.postMessage(message);			
-		}
-	}
+    if (evt.data == "READY") {
+        this.isReady = true;
+        //NaCl became ready -> Send queued messages
+        var message : String;
+        while ((message = postMessageQueue.pop())!=null) { 
+          innerIframe.contentWindow.postMessage(message,"*");
+        }
+    } else if (this.onmessage != null) {
+ 			Log.trace("  handing it off to onmessage");
+ 			this.onmessage(evt);
+ 		}else {
+      Log.trace("  queueing it");
+      onmessageQueue.add(evt);
+    }
+	}	
 	
 	public var isReady(default, null) : Bool;		
 	
@@ -227,23 +147,20 @@ private class NaClWorker_StringOnly implements EventTarget
 	}
 	
 	//Support for NaCl should be checked with isSupported before trying to create a new instance
-	public function new(filename : String) : Void {
+	public function new(url : String) : Void {
 		this.isReady = false;		
 		this.postMessageQueue = new List<String>();
 		this.onmessageQueue = new List<MessageEvent>();
-		this.onerrorQueue = new List<ErrorEvent>();
-		this.naclElement = js.Lib.document.createElement("embed");		
-		naclElement.setAttribute("width",0);
-		naclElement.setAttribute("height",0);
-		naclElement.setAttribute("src",filename);
-		naclElement.setAttribute("type", "application/x-nacl");
-		naclElement.addEventListener("progress", this._onprogress, false); //why???
-		naclElement.addEventListener("message", this._onmessage, false);				
-		naclElement.addEventListener("error", this._onerror, false);		
-		naclElement.addEventListener("abort", this._onabort, false); //???		
-		naclElement.addEventListener("crash", this._oncrash, false); //???
-		naclElement.addEventListener("load", this._onload, false);		
-		js.Lib.document.body.appendChild(naclElement); //This line will start to actually run it.		
+		this.outerIframe = js.Lib.document.createElement("iframe");
+		this.outerIframe.setAttribute("width",0);
+		this.outerIframe.setAttribute("height",0);
+		js.Lib.document.body.appendChild(this.outerIframe);
+		
+		this.innerIframe = js.Lib.document.createElement("iframe");
+		this.innerIframe.setAttribute("src", url);
+		
+		this.outerIframe.contentWindow.document.body.appendChild(this.innerIframe);    
+		this.outerIframe.contentWindow.addEventListener("message", this._onmessage, false);    			
 	}
 	
 	// TODO?: messagePort
@@ -251,13 +168,13 @@ private class NaClWorker_StringOnly implements EventTarget
 	var postMessageQueue : List<String>; //Queue messages until NaCl becomes ready
 	public function postMessage(message : Dynamic /*This should actually be String...*/ ) : Void {   
 		if (this.isReady) {			
-			naclElement.postMessage(message);
+			innerIframe.contentWindow.postMessage(message,"*");
 		} else {
 			postMessageQueue.add(message);
 		}
 	}
 	
 	public function terminate() : Void {    
-		js.Lib.document.body.removeChild(naclElement);
+		js.Lib.document.body.removeChild(this.outerIframe);
 	}
 }
