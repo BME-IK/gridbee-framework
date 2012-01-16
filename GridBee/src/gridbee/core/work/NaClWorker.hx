@@ -19,6 +19,7 @@
 package gridbee.core.work;
 
 import gridbee.core.iface.Worker;
+import gridbee.worksource.boinc.reply.Message;
 import haxe.Log;
 import js.Dom;
 import js.Lib;
@@ -30,7 +31,6 @@ import henkolib.log.Console;
  * ...
  * @author Kalmi
  */
-
 
 /*
  * NaClWorker is wrapper around NaCl that makes it act like a WebWorker.
@@ -57,20 +57,15 @@ class NaClWorker extends NaClWorker_StringOnly, implements Worker
 	}
   
 	private override function _onmessage(evt: MessageEvent) : Void {	
-		Log.trace("_onmessage JSON wrapper called with " + evt.data);
-		try{
-			evt.data = JSON.decode(evt.data);  
-		}catch (unknown : Dynamic) {
-			evt.data =  JSON.decode('{"command": "exception", "exception" : { "message" : "Got invalid JSON from NaCl. NaCl termined." }}');
-		}
+		//Log.trace("_onmessage JSON wrapper called with " + evt.data);
 		super._onmessage(evt);
 	}
   
-	public override function postMessage(message:Dynamic) { 
-		Log.trace("postMessage JSON wrapper called with " + message);    
+	public override function postMessage(message:Dynamic) {
+		//Log.trace("postMessage JSON wrapper called with " + message);    
 		message = JSON.encode(message); //FIXME: error handling
 		super.postMessage(message);
-	}	
+	}
 	
 	public function setOnerror(func : ErrorEvent -> Void) : Void
 	{
@@ -99,41 +94,58 @@ private class NaClWorker_StringOnly
 	public var onmessage (onmessageGetter , onmessageSetter): MessageEvent -> Void; //This is what gets set by the user. Its setter sends the contents of its queue to it.
 	private var onmessageTheRealOne : MessageEvent -> Void; //The internal variable that gets set/read by the getter/setter.
 	private function onmessageSetter(func : MessageEvent -> Void) : MessageEvent -> Void {		
-		Log.trace("onmessageSetter called");
+		//Log.trace("onmessageSetter called");
 		if (func != null) {			
 			if (!onmessageQueue.isEmpty())
-				Log.trace("  sending content of queue");
+			{
+				//Log.trace("  sending content of queue");
+			}
 			var evt : MessageEvent;
 			while ((evt = onmessageQueue.pop()) != null) { 
-				Log.trace("    sent");
+				//Log.trace("    sent");
 				func(evt);
 			}
 			this.onmessageTheRealOne = func;
-		}		
+		}	
 		return func;
 	}
 	private function onmessageGetter(): MessageEvent -> Void {
 		return this.onmessageTheRealOne;
 	}
-	private function _onmessage(evt: MessageEvent) : Void {	
-		Log.trace("_onmessage called");
-    if (evt.data == "READY") {
-        this.isReady = true;
-        //NaCl became ready -> Send queued messages
-        var message : String;
-        while ((message = postMessageQueue.pop())!=null) { 
-          innerIframe.contentWindow.postMessage(message,"*");
-        }
-    } else if (this.onmessage != null) {
- 			Log.trace("  handing it off to onmessage");
- 			this.onmessage(evt);
- 		}else {
-      Log.trace("  queueing it");
-      onmessageQueue.add(evt);
-    }
-	}	
 	
-	public var isReady(default, null) : Bool;		
+	private function ParseEventData(evt : MessageEvent) : MessageEvent
+	{
+		var simpleEvent = new SimpleMessageEvent();
+		simpleEvent.lastEventId = evt.lastEventId;
+		simpleEvent.origin = evt.origin;
+		simpleEvent.type = evt.type;
+		try {
+			simpleEvent.data = JSON.parse(evt.data);
+		}catch (unknown : Dynamic) {
+			simpleEvent.data = JSON.parse('{"command": "exception", "exception" : { "message" : "Got invalid JSON from NaCl. NaCl termined." }}');
+		}
+		return simpleEvent;
+	}
+	
+	private function _onmessage(evt: MessageEvent) : Void {	
+		//Log.trace("_onmessage called");
+		if (evt.data == "READY") {
+			this.isReady = true;
+			//NaCl became ready -> Send queued messages
+			var message : String;
+			while ((message = postMessageQueue.pop())!=null) { 
+			  innerIframe.contentWindow.postMessage(message,"*");
+			}
+		} else if (this.onmessage != null) {
+				//Log.trace("  handing it off to onmessage");
+				this.onmessage(ParseEventData(evt));
+		} else {
+		  //Log.trace("  queueing it");
+		  onmessageQueue.add(evt);
+		}
+	}
+	
+	public var isReady(default, null) : Bool;
 	
 	public static function isSupported():Bool {		
 		var testNaclElement:Dynamic = js.Lib.document.createElement("embed");

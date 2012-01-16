@@ -19,6 +19,7 @@
 package gridbee.core.iface;
 import gridbee.js.EventTarget;
 import gridbee.js.Event;
+import gridbee.worksource.boinc.reply.Message;
 
 /**
  * ...
@@ -38,6 +39,22 @@ interface MessageEvent implements Event
 	public var lastEventId : String;
 	//public var source : Dynamic;
 	//public var ports : Dynamic;
+}
+
+class SimpleMessageEvent implements MessageEvent
+{
+	public var data : Dynamic;
+	public var origin : String;
+	public var lastEventId : String;
+	public var type : String;
+	
+	public function new(data:Dynamic = "", origin = "", lastEventId = "", type = "")
+	{
+		this.data = data;
+		this.origin = origin;
+		this.lastEventId = lastEventId;
+		this.type = type;
+	}
 }
 
 // http://www.whatwg.org/specs/web-workers/current-work/#runtime-script-errors

@@ -33,5 +33,4 @@ class Message
 		
 		message = node.innerData;
 	}
-		
 }

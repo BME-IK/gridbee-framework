@@ -2875,6 +2875,211 @@ gridbee.worksource.boinc.webrpc.result.ApplicVersionRes.prototype.print = functi
 	$s.pop();
 }
 gridbee.worksource.boinc.webrpc.result.ApplicVersionRes.prototype.__class__ = gridbee.worksource.boinc.webrpc.result.ApplicVersionRes;
+gridbee.core.work.hxjson2.JSONEncoder = function(value) { if( value === $_ ) return; {
+	$s.push("gridbee.core.work.hxjson2.JSONEncoder::new");
+	var $spos = $s.length;
+	this.jsonString = this.convertToString(value);
+	$s.pop();
+}}
+gridbee.core.work.hxjson2.JSONEncoder.__name__ = ["gridbee","core","work","hxjson2","JSONEncoder"];
+gridbee.core.work.hxjson2.JSONEncoder.prototype.jsonString = null;
+gridbee.core.work.hxjson2.JSONEncoder.prototype.getString = function() {
+	$s.push("gridbee.core.work.hxjson2.JSONEncoder::getString");
+	var $spos = $s.length;
+	{
+		var $tmp = this.jsonString;
+		$s.pop();
+		return $tmp;
+	}
+	$s.pop();
+}
+gridbee.core.work.hxjson2.JSONEncoder.prototype.convertToString = function(value) {
+	$s.push("gridbee.core.work.hxjson2.JSONEncoder::convertToString");
+	var $spos = $s.length;
+	if(Std["is"](value,List) || Std["is"](value,IntHash)) value = Lambda.array(value);
+	if(Std["is"](value,Hash)) value = this.mapHash(value);
+	if(Std["is"](value,String)) {
+		{
+			var $tmp = this.escapeString((function($this) {
+				var $r;
+				var $t = value;
+				if(Std["is"]($t,String)) $t;
+				else throw "Class cast error";
+				$r = $t;
+				return $r;
+			}(this)));
+			$s.pop();
+			return $tmp;
+		}
+	}
+	else if(Std["is"](value,Float)) {
+		{
+			var $tmp = Math.isFinite((function($this) {
+				var $r;
+				var $t = value;
+				if(Std["is"]($t,Float)) $t;
+				else throw "Class cast error";
+				$r = $t;
+				return $r;
+			}(this)))?value + "":"null";
+			$s.pop();
+			return $tmp;
+		}
+	}
+	else if(Std["is"](value,Bool)) {
+		{
+			var $tmp = value?"true":"false";
+			$s.pop();
+			return $tmp;
+		}
+	}
+	else if(Std["is"](value,Array)) {
+		{
+			var $tmp = this.arrayToString((function($this) {
+				var $r;
+				var $t = value;
+				if(Std["is"]($t,Array)) $t;
+				else throw "Class cast error";
+				$r = $t;
+				return $r;
+			}(this)));
+			$s.pop();
+			return $tmp;
+		}
+	}
+	else if(Std["is"](value,Dynamic) && value != null) {
+		{
+			var $tmp = this.objectToString(value);
+			$s.pop();
+			return $tmp;
+		}
+	}
+	{
+		$s.pop();
+		return "null";
+	}
+	$s.pop();
+}
+gridbee.core.work.hxjson2.JSONEncoder.prototype.mapHash = function(value) {
+	$s.push("gridbee.core.work.hxjson2.JSONEncoder::mapHash");
+	var $spos = $s.length;
+	var ret = { };
+	{ var $it0 = value.keys();
+	while( $it0.hasNext() ) { var i = $it0.next();
+	ret[i] = value.get(i);
+	}}
+	{
+		$s.pop();
+		return ret;
+	}
+	$s.pop();
+}
+gridbee.core.work.hxjson2.JSONEncoder.prototype.escapeString = function(str) {
+	$s.push("gridbee.core.work.hxjson2.JSONEncoder::escapeString");
+	var $spos = $s.length;
+	var s = "";
+	var ch;
+	var len = str.length;
+	{
+		var _g = 0;
+		while(_g < len) {
+			var i = _g++;
+			ch = str.charAt(i);
+			switch(ch) {
+			case "/":{
+				s += "\\/";
+			}break;
+			case "\"":{
+				s += "\\\"";
+			}break;
+			case "\\":{
+				s += "\\\\";
+			}break;
+			case "\n":{
+				s += "\\n";
+			}break;
+			case "\r":{
+				s += "\\r";
+			}break;
+			case "\t":{
+				s += "\\t";
+			}break;
+			default:{
+				var code = ch.charCodeAt(0);
+				if(ch < " " || code > 127) {
+					var hexCode = StringTools.hex(ch.charCodeAt(0));
+					var zeroPad = "";
+					{
+						var _g2 = 0, _g1 = 4 - hexCode.length;
+						while(_g2 < _g1) {
+							var j = _g2++;
+							zeroPad += "0";
+						}
+					}
+					s += "\\u" + zeroPad + hexCode;
+				}
+				else {
+					s += ch;
+				}
+			}break;
+			}
+		}
+	}
+	{
+		var $tmp = "\"" + s + "\"";
+		$s.pop();
+		return $tmp;
+	}
+	$s.pop();
+}
+gridbee.core.work.hxjson2.JSONEncoder.prototype.arrayToString = function(a) {
+	$s.push("gridbee.core.work.hxjson2.JSONEncoder::arrayToString");
+	var $spos = $s.length;
+	var s = "";
+	{
+		var _g1 = 0, _g = a.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			if(s.length > 0) {
+				s += ",";
+			}
+			s += this.convertToString(a[i]);
+		}
+	}
+	{
+		var $tmp = "[" + s + "]";
+		$s.pop();
+		return $tmp;
+	}
+	$s.pop();
+}
+gridbee.core.work.hxjson2.JSONEncoder.prototype.objectToString = function(o) {
+	$s.push("gridbee.core.work.hxjson2.JSONEncoder::objectToString");
+	var $spos = $s.length;
+	var s = "";
+	var value;
+	{
+		var _g = 0, _g1 = Reflect.fields(o);
+		while(_g < _g1.length) {
+			var key = _g1[_g];
+			++_g;
+			value = Reflect.field(o,key);
+			if(!Reflect.isFunction(value)) {
+				if(s.length > 0) {
+					s += ",";
+				}
+				s += this.escapeString(key) + ":" + this.convertToString(value);
+			}
+		}
+	}
+	{
+		var $tmp = "{" + s + "}";
+		$s.pop();
+		return $tmp;
+	}
+	$s.pop();
+}
+gridbee.core.work.hxjson2.JSONEncoder.prototype.__class__ = gridbee.core.work.hxjson2.JSONEncoder;
 if(typeof js=='undefined') js = {}
 js.Boot = function() { }
 js.Boot.__name__ = ["js","Boot"];
@@ -3281,211 +3486,6 @@ js.Boot.__init = function() {
 	$s.pop();
 }
 js.Boot.prototype.__class__ = js.Boot;
-gridbee.core.work.hxjson2.JSONEncoder = function(value) { if( value === $_ ) return; {
-	$s.push("gridbee.core.work.hxjson2.JSONEncoder::new");
-	var $spos = $s.length;
-	this.jsonString = this.convertToString(value);
-	$s.pop();
-}}
-gridbee.core.work.hxjson2.JSONEncoder.__name__ = ["gridbee","core","work","hxjson2","JSONEncoder"];
-gridbee.core.work.hxjson2.JSONEncoder.prototype.jsonString = null;
-gridbee.core.work.hxjson2.JSONEncoder.prototype.getString = function() {
-	$s.push("gridbee.core.work.hxjson2.JSONEncoder::getString");
-	var $spos = $s.length;
-	{
-		var $tmp = this.jsonString;
-		$s.pop();
-		return $tmp;
-	}
-	$s.pop();
-}
-gridbee.core.work.hxjson2.JSONEncoder.prototype.convertToString = function(value) {
-	$s.push("gridbee.core.work.hxjson2.JSONEncoder::convertToString");
-	var $spos = $s.length;
-	if(Std["is"](value,List) || Std["is"](value,IntHash)) value = Lambda.array(value);
-	if(Std["is"](value,Hash)) value = this.mapHash(value);
-	if(Std["is"](value,String)) {
-		{
-			var $tmp = this.escapeString((function($this) {
-				var $r;
-				var $t = value;
-				if(Std["is"]($t,String)) $t;
-				else throw "Class cast error";
-				$r = $t;
-				return $r;
-			}(this)));
-			$s.pop();
-			return $tmp;
-		}
-	}
-	else if(Std["is"](value,Float)) {
-		{
-			var $tmp = Math.isFinite((function($this) {
-				var $r;
-				var $t = value;
-				if(Std["is"]($t,Float)) $t;
-				else throw "Class cast error";
-				$r = $t;
-				return $r;
-			}(this)))?value + "":"null";
-			$s.pop();
-			return $tmp;
-		}
-	}
-	else if(Std["is"](value,Bool)) {
-		{
-			var $tmp = value?"true":"false";
-			$s.pop();
-			return $tmp;
-		}
-	}
-	else if(Std["is"](value,Array)) {
-		{
-			var $tmp = this.arrayToString((function($this) {
-				var $r;
-				var $t = value;
-				if(Std["is"]($t,Array)) $t;
-				else throw "Class cast error";
-				$r = $t;
-				return $r;
-			}(this)));
-			$s.pop();
-			return $tmp;
-		}
-	}
-	else if(Std["is"](value,Dynamic) && value != null) {
-		{
-			var $tmp = this.objectToString(value);
-			$s.pop();
-			return $tmp;
-		}
-	}
-	{
-		$s.pop();
-		return "null";
-	}
-	$s.pop();
-}
-gridbee.core.work.hxjson2.JSONEncoder.prototype.mapHash = function(value) {
-	$s.push("gridbee.core.work.hxjson2.JSONEncoder::mapHash");
-	var $spos = $s.length;
-	var ret = { };
-	{ var $it0 = value.keys();
-	while( $it0.hasNext() ) { var i = $it0.next();
-	ret[i] = value.get(i);
-	}}
-	{
-		$s.pop();
-		return ret;
-	}
-	$s.pop();
-}
-gridbee.core.work.hxjson2.JSONEncoder.prototype.escapeString = function(str) {
-	$s.push("gridbee.core.work.hxjson2.JSONEncoder::escapeString");
-	var $spos = $s.length;
-	var s = "";
-	var ch;
-	var len = str.length;
-	{
-		var _g = 0;
-		while(_g < len) {
-			var i = _g++;
-			ch = str.charAt(i);
-			switch(ch) {
-			case "/":{
-				s += "\\/";
-			}break;
-			case "\"":{
-				s += "\\\"";
-			}break;
-			case "\\":{
-				s += "\\\\";
-			}break;
-			case "\n":{
-				s += "\\n";
-			}break;
-			case "\r":{
-				s += "\\r";
-			}break;
-			case "\t":{
-				s += "\\t";
-			}break;
-			default:{
-				var code = ch.charCodeAt(0);
-				if(ch < " " || code > 127) {
-					var hexCode = StringTools.hex(ch.charCodeAt(0));
-					var zeroPad = "";
-					{
-						var _g2 = 0, _g1 = 4 - hexCode.length;
-						while(_g2 < _g1) {
-							var j = _g2++;
-							zeroPad += "0";
-						}
-					}
-					s += "\\u" + zeroPad + hexCode;
-				}
-				else {
-					s += ch;
-				}
-			}break;
-			}
-		}
-	}
-	{
-		var $tmp = "\"" + s + "\"";
-		$s.pop();
-		return $tmp;
-	}
-	$s.pop();
-}
-gridbee.core.work.hxjson2.JSONEncoder.prototype.arrayToString = function(a) {
-	$s.push("gridbee.core.work.hxjson2.JSONEncoder::arrayToString");
-	var $spos = $s.length;
-	var s = "";
-	{
-		var _g1 = 0, _g = a.length;
-		while(_g1 < _g) {
-			var i = _g1++;
-			if(s.length > 0) {
-				s += ",";
-			}
-			s += this.convertToString(a[i]);
-		}
-	}
-	{
-		var $tmp = "[" + s + "]";
-		$s.pop();
-		return $tmp;
-	}
-	$s.pop();
-}
-gridbee.core.work.hxjson2.JSONEncoder.prototype.objectToString = function(o) {
-	$s.push("gridbee.core.work.hxjson2.JSONEncoder::objectToString");
-	var $spos = $s.length;
-	var s = "";
-	var value;
-	{
-		var _g = 0, _g1 = Reflect.fields(o);
-		while(_g < _g1.length) {
-			var key = _g1[_g];
-			++_g;
-			value = Reflect.field(o,key);
-			if(!Reflect.isFunction(value)) {
-				if(s.length > 0) {
-					s += ",";
-				}
-				s += this.escapeString(key) + ":" + this.convertToString(value);
-			}
-		}
-	}
-	{
-		var $tmp = "{" + s + "}";
-		$s.pop();
-		return $tmp;
-	}
-	$s.pop();
-}
-gridbee.core.work.hxjson2.JSONEncoder.prototype.__class__ = gridbee.core.work.hxjson2.JSONEncoder;
 gridbee.worksource.boinc.webrpc.result.ServerStatusRes = function(input) { if( input === $_ ) return; {
 	$s.push("gridbee.worksource.boinc.webrpc.result.ServerStatusRes::new");
 	var $spos = $s.length;
@@ -3546,6 +3546,26 @@ gridbee.core.iface.MessageEvent.prototype.origin = null;
 gridbee.core.iface.MessageEvent.prototype.lastEventId = null;
 gridbee.core.iface.MessageEvent.prototype.__class__ = gridbee.core.iface.MessageEvent;
 gridbee.core.iface.MessageEvent.__interfaces__ = [gridbee.core.iface.Event];
+gridbee.core.iface.SimpleMessageEvent = function(data,origin,lastEventId,type) { if( data === $_ ) return; {
+	$s.push("gridbee.core.iface.SimpleMessageEvent::new");
+	var $spos = $s.length;
+	if(type == null) type = "";
+	if(lastEventId == null) lastEventId = "";
+	if(origin == null) origin = "";
+	if(data == null) data = "";
+	this.data = data;
+	this.origin = origin;
+	this.lastEventId = lastEventId;
+	this.type = type;
+	$s.pop();
+}}
+gridbee.core.iface.SimpleMessageEvent.__name__ = ["gridbee","core","iface","SimpleMessageEvent"];
+gridbee.core.iface.SimpleMessageEvent.prototype.data = null;
+gridbee.core.iface.SimpleMessageEvent.prototype.origin = null;
+gridbee.core.iface.SimpleMessageEvent.prototype.lastEventId = null;
+gridbee.core.iface.SimpleMessageEvent.prototype.type = null;
+gridbee.core.iface.SimpleMessageEvent.prototype.__class__ = gridbee.core.iface.SimpleMessageEvent;
+gridbee.core.iface.SimpleMessageEvent.__interfaces__ = [gridbee.core.iface.MessageEvent];
 gridbee.core.iface.ErrorEvent = function() { }
 gridbee.core.iface.ErrorEvent.__name__ = ["gridbee","core","iface","ErrorEvent"];
 gridbee.core.iface.ErrorEvent.prototype.message = null;
@@ -4928,12 +4948,10 @@ gridbee.core.work._NaClWorker.NaClWorker_StringOnly.prototype.onmessageTheRealOn
 gridbee.core.work._NaClWorker.NaClWorker_StringOnly.prototype.onmessageSetter = function(func) {
 	$s.push("gridbee.core.work._NaClWorker.NaClWorker_StringOnly::onmessageSetter");
 	var $spos = $s.length;
-	haxe.Log.trace("onmessageSetter called",{ fileName : "NaClWorker.hx", lineNumber : 102, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "onmessageSetter"});
 	if(func != null) {
-		if(!this.onmessageQueue.isEmpty()) haxe.Log.trace("  sending content of queue",{ fileName : "NaClWorker.hx", lineNumber : 105, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "onmessageSetter"});
+		if(!this.onmessageQueue.isEmpty()) null;
 		var evt;
 		while((evt = this.onmessageQueue.pop()) != null) {
-			haxe.Log.trace("    sent",{ fileName : "NaClWorker.hx", lineNumber : 108, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "onmessageSetter"});
 			func(evt);
 		}
 		this.onmessageTheRealOne = func;
@@ -4954,10 +4972,36 @@ gridbee.core.work._NaClWorker.NaClWorker_StringOnly.prototype.onmessageGetter = 
 	}
 	$s.pop();
 }
+gridbee.core.work._NaClWorker.NaClWorker_StringOnly.prototype.ParseEventData = function(evt) {
+	$s.push("gridbee.core.work._NaClWorker.NaClWorker_StringOnly::ParseEventData");
+	var $spos = $s.length;
+	var simpleEvent = new gridbee.core.iface.SimpleMessageEvent();
+	simpleEvent.lastEventId = evt.lastEventId;
+	simpleEvent.origin = evt.origin;
+	simpleEvent.type = evt.type;
+	try {
+		simpleEvent.data = new gridbee.core.work.hxjson2.JSONDecoder(evt.data,true).getValue();
+	}
+	catch( $e0 ) {
+		{
+			var unknown = $e0;
+			{
+				$e = [];
+				while($s.length >= $spos) $e.unshift($s.pop());
+				$s.push($e[0]);
+				simpleEvent.data = new gridbee.core.work.hxjson2.JSONDecoder("{\"command\": \"exception\", \"exception\" : { \"message\" : \"Got invalid JSON from NaCl. NaCl termined.\" }}",true).getValue();
+			}
+		}
+	}
+	{
+		$s.pop();
+		return simpleEvent;
+	}
+	$s.pop();
+}
 gridbee.core.work._NaClWorker.NaClWorker_StringOnly.prototype._onmessage = function(evt) {
 	$s.push("gridbee.core.work._NaClWorker.NaClWorker_StringOnly::_onmessage");
 	var $spos = $s.length;
-	haxe.Log.trace("_onmessage called",{ fileName : "NaClWorker.hx", lineNumber : 119, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "_onmessage"});
 	if(evt.data == "READY") {
 		this.isReady = true;
 		var message;
@@ -4966,11 +5010,9 @@ gridbee.core.work._NaClWorker.NaClWorker_StringOnly.prototype._onmessage = funct
 		}
 	}
 	else if(this.onmessageGetter() != null) {
-		haxe.Log.trace("  handing it off to onmessage",{ fileName : "NaClWorker.hx", lineNumber : 128, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "_onmessage"});
-		(this.onmessageGetter())(evt);
+		(this.onmessageGetter())(this.ParseEventData(evt));
 	}
 	else {
-		haxe.Log.trace("  queueing it",{ fileName : "NaClWorker.hx", lineNumber : 131, className : "gridbee.core.work._NaClWorker.NaClWorker_StringOnly", methodName : "_onmessage"});
 		this.onmessageQueue.add(evt);
 	}
 	$s.pop();
@@ -5017,28 +5059,12 @@ gridbee.core.work.NaClWorker.isSupported = function() {
 gridbee.core.work.NaClWorker.prototype._onmessage = function(evt) {
 	$s.push("gridbee.core.work.NaClWorker::_onmessage");
 	var $spos = $s.length;
-	haxe.Log.trace("_onmessage JSON wrapper called with " + evt.data,{ fileName : "NaClWorker.hx", lineNumber : 60, className : "gridbee.core.work.NaClWorker", methodName : "_onmessage"});
-	try {
-		evt.data = new gridbee.core.work.hxjson2.JSONDecoder(evt.data,true).getValue();
-	}
-	catch( $e0 ) {
-		{
-			var unknown = $e0;
-			{
-				$e = [];
-				while($s.length >= $spos) $e.unshift($s.pop());
-				$s.push($e[0]);
-				evt.data = new gridbee.core.work.hxjson2.JSONDecoder("{\"command\": \"exception\", \"exception\" : { \"message\" : \"Got invalid JSON from NaCl. NaCl termined.\" }}",true).getValue();
-			}
-		}
-	}
 	gridbee.core.work._NaClWorker.NaClWorker_StringOnly.prototype._onmessage.call(this,evt);
 	$s.pop();
 }
 gridbee.core.work.NaClWorker.prototype.postMessage = function(message) {
 	$s.push("gridbee.core.work.NaClWorker::postMessage");
 	var $spos = $s.length;
-	haxe.Log.trace("postMessage JSON wrapper called with " + message,{ fileName : "NaClWorker.hx", lineNumber : 70, className : "gridbee.core.work.NaClWorker", methodName : "postMessage"});
 	message = new gridbee.core.work.hxjson2.JSONEncoder(message).getString();
 	gridbee.core.work._NaClWorker.NaClWorker_StringOnly.prototype.postMessage.call(this,message);
 	$s.pop();
@@ -9155,7 +9181,7 @@ gridbee.core.work.WorkExecutor.prototype.terminate = function() {
 gridbee.core.work.WorkExecutor.prototype.onerror = function(event) {
 	$s.push("gridbee.core.work.WorkExecutor::onerror");
 	var $spos = $s.length;
-	this.temp.log(henkolib.log.LogLevel.L1_Error,"worker error: " + event.message,event,null,{ fileName : "WorkExecutor.hx", lineNumber : 109, className : "gridbee.core.work.WorkExecutor", methodName : "onerror"});
+	this.temp.log(henkolib.log.LogLevel.L1_Error,"worker error: " + event.message,event,null,{ fileName : "WorkExecutor.hx", lineNumber : 110, className : "gridbee.core.work.WorkExecutor", methodName : "onerror"});
 	this.operation.setError("worker error: " + event.message);
 	$s.pop();
 }
@@ -9176,7 +9202,7 @@ gridbee.core.work.WorkExecutor.prototype.onmessage = function(event) {
 		this.operation.setResult(this.context);
 	}
 	if(command == "exception") {
-		this.temp.log(henkolib.log.LogLevel.L1_Error,data.type + " error",data.exception,null,{ fileName : "WorkExecutor.hx", lineNumber : 135, className : "gridbee.core.work.WorkExecutor", methodName : "onmessage"});
+		this.temp.log(henkolib.log.LogLevel.L1_Error,data.type + " error",data.exception,null,{ fileName : "WorkExecutor.hx", lineNumber : 136, className : "gridbee.core.work.WorkExecutor", methodName : "onmessage"});
 		this.context.copyFrom(this.temp);
 		this.terminate();
 		this.operation.setError(data.type + " error: " + data.exception.message);
@@ -9201,7 +9227,7 @@ gridbee.core.work.WorkExecutor.prototype.onmessage = function(event) {
 		this.context.copyFrom(this.temp);
 	}
 	if(command == "debug") {
-		this.temp.log(henkolib.log.LogLevel.L5_Debug,"Debug",data,null,{ fileName : "WorkExecutor.hx", lineNumber : 172, className : "gridbee.core.work.WorkExecutor", methodName : "onmessage"});
+		this.temp.log(henkolib.log.LogLevel.L5_Debug,"Debug",data,null,{ fileName : "WorkExecutor.hx", lineNumber : 173, className : "gridbee.core.work.WorkExecutor", methodName : "onmessage"});
 	}
 	$s.pop();
 }

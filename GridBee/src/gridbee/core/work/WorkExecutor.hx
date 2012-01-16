@@ -26,6 +26,7 @@ import henkolib.log.Console;
 import henkolib.log.LogLevel;
 import gridbee.js.EventTarget;
 import gridbee.core.iface.Worker;
+import gridbee.core.work.NaClWorker;
 
 /**
  * @author Henko
@@ -114,7 +115,7 @@ class WorkExecutor implements Operable
 	{
 		var command : String = event.data.command;
 		var data : Dynamic = event.data.data;
-		
+
 		if (command == "running")
 		{
 			this.running = true;
