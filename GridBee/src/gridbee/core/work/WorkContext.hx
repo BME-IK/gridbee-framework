@@ -40,6 +40,7 @@ class WorkContext implements Persistent
 	var worktime : Float;
 	var exitstatus : Int;
 	var completed : Bool;
+	var platform : String;
 
 	var changed : Bool;	
 	
@@ -51,6 +52,7 @@ class WorkContext implements Persistent
 		worktime = 0;
 		exitstatus = 0;
 		completed = false;
+		platform = "";
 		init();
 	}
 	
@@ -124,6 +126,11 @@ class WorkContext implements Persistent
 		}
 	}
 	
+	public function setPlatform(p : String)
+	{
+		platform = p;
+	}
+	
 	public function setCheckpoint(data : Dynamic)
 	{
 		if (completed) return;
@@ -134,6 +141,11 @@ class WorkContext implements Persistent
 	public function getCheckpoint() : Dynamic
 	{
 		return this.checkpointdata;
+	}
+	
+	public function getPlatform() : String
+	{
+		return platform;
 	}
 	
 	public function getCreatedDate() : Date
@@ -278,6 +290,7 @@ class WorkContext implements Persistent
 		s.serialize(worktime);
 		s.serialize(exitstatus);
 		s.serialize(completed);
+		s.serialize(platform);
 		
 		changed = false;
     }
@@ -293,6 +306,7 @@ class WorkContext implements Persistent
 		this.worktime = s.unserialize();
 		this.exitstatus = s.unserialize();
 		this.completed = s.unserialize();
+		this.platform = s.unserialize();
 		init();
     }
 }

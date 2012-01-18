@@ -17,36 +17,20 @@
 // along with GridBee. If not, see <http://www.gnu.org/licenses/>.
 
 package gridbee.js;
+import gridbee.core.iface.Worker;
+import henkolib.log.Console;
 
 /**
  * ...
- * @author MG
+ * @author MG, tbur
  */
 
-// http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html#event-definitions-1
-interface MessageEvent implements Event
-{
-	public var data : Dynamic;
-	public var origin : String;
-	public var lastEventId : String;
-	//public var source : Dynamic;
-	//public var ports : Dynamic;
-}
-
-// http://www.whatwg.org/specs/web-workers/current-work/#runtime-script-errors
-interface ErrorEvent implements Event
-{
-	public var message : String;
-	public var filename : String;
-	public var lineno : Int;
-}
-
 // http://www.whatwg.org/specs/web-workers/current-work/
-extern class Worker implements EventTarget
+extern class WebWorker
 {
 	public function addEventListener(type : String, listener : Dynamic, useCapture : Bool = false) : Void;
 	public function removeEventListener(type : String, listener : Dynamic, useCapture : Bool = false) : Void;
-	public function dispatchEvent(event : Event) : Bool;	
+	public function dispatchEvent(event : Event) : Bool;
 	
 	public dynamic function onmessage(evt : MessageEvent) : Void;
 	public dynamic function onerror(evt : ErrorEvent) : Void;
@@ -61,10 +45,56 @@ extern class Worker implements EventTarget
 	{
 		try
 		{
-			untyped gridbee.js["Worker"] = untyped __js__("Worker");
+			untyped gridbee.js["WebWorker"] = untyped __js__("Worker");
 		} catch (e : Dynamic) {
-			untyped gridbee.js["Worker"] = null;
+			untyped gridbee.js["WebWorker"] = null;
 		}
 	}
+}
 
+// http://www.whatwg.org/specs/web-workers/current-work/
+class JSWorker implements Worker
+{
+	private var ww : WebWorker;
+	
+	public function new(filename : String) : Void
+	{
+		ww = new WebWorker(filename);
+	}
+	
+	public function addEventListener(type : String, listener : Dynamic, useCapture : Bool = false) : Void
+	{
+		ww.addEventListener(type, listener, useCapture);
+	}
+	
+	public function removeEventListener(type : String, listener : Dynamic, useCapture : Bool = false) : Void
+	{
+		ww.removeEventListener(type, listener, useCapture);
+	}
+	
+	public function dispatchEvent(event : Event) : Bool
+	{
+		return ww.dispatchEvent(event);
+	}
+	
+	public function setOnmessage(func : MessageEvent -> Void) : Void
+	{
+		ww.onmessage = func;
+	}
+	
+	public function setOnerror(func : ErrorEvent -> Void) : Void
+	{
+		ww.onerror = func;
+	}
+	
+	// TODO: messagePort
+	public function postMessage(message : Dynamic) : Void
+	{
+		ww.postMessage(message);
+	}
+	
+	public function terminate() : Void
+	{
+		ww.terminate();
+	}
 }

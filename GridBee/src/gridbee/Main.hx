@@ -26,6 +26,7 @@ import gridbee.core.work.BasicWorkUnit;
 import gridbee.core.work.BasicWorkSource;
 import gridbee.worksource.boinc.BoincWorkUnit;
 import gridbee.core.work.FileStream;
+import gridbee.core.work.NaClWorker;
 
 /**
  * ...

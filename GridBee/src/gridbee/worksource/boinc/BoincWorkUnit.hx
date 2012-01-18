@@ -46,12 +46,12 @@ class BoincWorkUnit extends BasicWorkUnit
 	// required for unserialization
 	private var filesdownloaded : Bool;
 
-	override public function new(unit : Workunit) 
+	override public function new(unit : Workunit, ?platform : String = "") 
 	{
 		this.unitinfo = unit;		
 		this.readytoreport = false;
 		this.filesdownloaded = false;
-		super();
+		super(platform);
 	}
 	
 	override private function init()
@@ -79,14 +79,26 @@ class BoincWorkUnit extends BasicWorkUnit
 		
 		var downloader = new Downloader();
 		
-		for (data in unitinfo.file_ref)
+		if (context.getPlatform() == "nacl")
 		{
-			downloader.add(data.file_info.url);
-			//Console.main.logInformation("Downloading file: "+data.file_info.url, null, this);
+			for (data in unitinfo.file_ref)
+			{
+				// NaCl executables are downloaded by Chrome's inner mechanism
+				if (data.file_info.url.substr( -5) != ".nexe" && data.file_info.url.substr( -4) != ".nmf")
+					downloader.add(data.file_info.url);
+			}
+			// Chrome handles code downloading
+			context.setProgramCode(unitinfo.application.version.main_program.file_info.url);
 		}
-		downloader.add(unitinfo.application.version.main_program.file_info.url);
-		//Console.main.logInformation("Downloading program file: "+unitinfo.application.version.main_program.file_info.url, null, this);
-
+		else // platform == "javascript"
+		{
+			for (data in unitinfo.file_ref)
+			{
+				downloader.add(data.file_info.url);
+			}
+			downloader.add(unitinfo.application.version.main_program.file_info.url);
+		}
+		
 		onlog.invoke(new LogEntry(null, LogLevel.L5_Debug, "Downloading input files", null, null));
 		var dlresult = downloader.downloadAll();
 		

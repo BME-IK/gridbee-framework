@@ -49,6 +49,7 @@ import gridbee.worksource.boinc.reply.FileInfo;
 import gridbee.worksource.boinc.reply.AppVersion;
 import gridbee.worksource.boinc.reply.Workunit;
 import gridbee.worksource.boinc.reply.ResultSlot;
+import gridbee.core.info.BrowserInfo;
 
 /**
  * @author Henko, tbur
@@ -57,16 +58,15 @@ import gridbee.worksource.boinc.reply.ResultSlot;
 class BoincWorkSource extends BasicWorkSource
 {
 	static var version : ClientVersion;
-	static var platform : String;
 	
 	public var projecturl : String;
     public var projectname : String;
     public var username : String;
+	public var platform : String;
 	
 	public static function __init__()
 	{
 		version = new ClientVersion(3, 0, 0);
-		platform = "javascript";
 	}
 	
 	var scheduler_url : String;
@@ -98,7 +98,16 @@ class BoincWorkSource extends BasicWorkSource
 		
 		this.uploader = new BoincUploaderPool();
 
-		
+		if (BrowserInfo.NaCl())
+		{
+			platform = "nacl";
+			Console.main.logInformation("Setting platform to 'nacl'", null, this);
+		}
+		else
+		{
+			platform = "javascript";
+			Console.main.logInformation("Setting platform to 'javascript'", null, this);
+		}
 		host = new Host();
 		host.host_info.p_fpops = 0;
 		host.host_info.p_iops = 0;
@@ -153,11 +162,16 @@ class BoincWorkSource extends BasicWorkSource
 				var self = this;
 				newworks.onComplete.subscribe(function(wus)
 				{
+					if (wus.length == 0)
+					{
+						self.platform = "javascript";
+						Console.main.logInformation("Setting platform to JavaScript", null, self);
+					}
 					for (wu in wus)
 					{
 						self.workpool.add(wu);
 						self.onaddworkunit.invoke(wu);
-						Console.main.logInformation("Workunit added to pool", null, self);
+						Console.main.logInformation("New workunit recieved", null, self);
 					}
 				});
 				
@@ -341,8 +355,10 @@ class BoincWorkSource extends BasicWorkSource
 						break;
 					}
 				}
-				
-				var bwu = new BoincWorkUnit(unit);				
+				var platform : String = "";
+				for (v in reply.app_version)
+					platform = v.platform;
+				var bwu = new BoincWorkUnit(unit,platform);	
 				workunits.push(bwu);
 			}
 			
@@ -372,6 +388,7 @@ class BoincWorkSource extends BasicWorkSource
 		s.serialize(projecturl);
 		s.serialize(projectname);
 		s.serialize(username);
+		s.serialize(platform);
 
 		super.hxSerialize(s);
     }
@@ -386,6 +403,7 @@ class BoincWorkSource extends BasicWorkSource
 		projecturl = s.unserialize();
 		projectname = s.unserialize();
 		username = s.unserialize();
+		platform = s.unserialize();
 
 		super.hxUnserialize(s);
     }

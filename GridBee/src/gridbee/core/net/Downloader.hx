@@ -22,6 +22,7 @@ import henkolib.async.AsyncOperation;
 import henkolib.async.AsyncResult;
 import gridbee.core.net.HTTPRequest;
 import gridbee.core.work.FileStream;
+import henkolib.log.Console;
 
 
 /**
@@ -54,6 +55,7 @@ class Downloader
 	public function add(url : String) : Void
 	{
 		urls.push(url);
+		Console.main.logInformation("Downloading: " + url);
 	}
 	
 	public function downloadAll() : AsyncResult<Hash<FileStream>>
