@@ -70,6 +70,11 @@ class WorkSourcePool implements Operable, implements Persistent
 		targetactive = num;
 	}
 	
+	public function getTargetActive() : Int
+	{
+		return targetactive;
+	}
+	
 	public function getNumActive() : Int
 	{
 		var active = 0;

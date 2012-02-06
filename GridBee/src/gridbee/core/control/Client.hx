@@ -83,6 +83,11 @@ class Client
 		worksourcepool.setTargetActive(n);
 	}
 	
+	public function getThreadNumber() : Int
+	{
+		return worksourcepool.getTargetActive();
+	}
+	
 	public function onrun()
 	{
 		worksourcepool.operate();
